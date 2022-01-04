@@ -21,5 +21,6 @@ public class RoomJoinLex extends Lex {
 			roomName = roomName.substring(1);
 
 		client.joinedRooms.put(roomName, new IRCChannel(roomName));
+		client.onChannelJoinEvent.fire(roomName);
 	}
 }

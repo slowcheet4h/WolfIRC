@@ -29,8 +29,10 @@ public class WolfIRC {
 	public event<WOnPing> onPingEvent = new event<>();
 	public event<WOnMotdEnd> onMotdEndEvent = new event<>();
 	public event<WOnRawData> onRawDataEvent = new event<>();
-	public event<WOnRoomJoin> onRoomJoin = new event<>();
+	public event<WOnChannelJoin> onChannelJoinEvent = new event<>();
 	public event<WOnChannelMessage> onChannelMessage = new event<>();
+	public event<WOnUserNickChange> onUserNickChangeEvent = new event<>();
+	public event<WOnUserJoinChannel> onUserJoinChannelEvent = new event<>();
 
 	public final HashMap<String, IRCChannel> joinedRooms;
 

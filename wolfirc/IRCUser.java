@@ -13,6 +13,10 @@ public class IRCUser {
 		username = _username;
 	}
 
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
 	public boolean isOp() {
 		return op;
 	}
