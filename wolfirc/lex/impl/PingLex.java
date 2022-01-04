@@ -8,14 +8,14 @@ import java.util.regex.Pattern;
 
 public class PingLex extends Lex {
 
-	public PingLex() {
-		super(Pattern.compile("(PING\\ :)([^ :\\n]+)(:?)"));
-	}
+    public PingLex() {
+        super(Pattern.compile("(PING\\ :)([^ :\\n]+)(:?)"));
+    }
 
-	@Override
-	public void onDataReceive(String data, Matcher matcher, WolfIRC client) {
-		String pingMessage = matcher.group(2);
-		client.sendRawLine("PONG :" + pingMessage);
-		System.out.println("Ponged with message " + pingMessage);
-	}
+    @Override
+    public void onDataReceive(String data, Matcher matcher, WolfIRC client) {
+        String pingMessage = matcher.group(2);
+        client.sendRawLine("PONG :" + pingMessage);
+        client.onPingEvent.fire(pingMessage);
+    }
 }

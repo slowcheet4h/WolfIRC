@@ -7,14 +7,14 @@ import java.util.regex.Pattern;
 
 public abstract class Lex {
 
-	protected Pattern regex;
-	public Lex(Pattern _regex) {
-		regex = _regex;
-	}
+    protected Pattern regex;
+    public Lex(Pattern _regex) {
+        regex = _regex;
+    }
 
-	public abstract void onDataReceive(final String data, Matcher matcher, WolfIRC client);
+    public abstract void onDataReceive(final String data, Matcher matcher, WolfIRC client);
 
-	public Pattern regex() {
-		return regex;
-	}
+    public Pattern regex() {
+        return regex;
+    }
 }

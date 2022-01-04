@@ -9,13 +9,13 @@ import java.util.regex.Pattern;
 public class MotdEndLex extends Lex {
 
 
-	public MotdEndLex() {
-		super(Pattern.compile("^(:)([^\\n: ]+) ([^\\n: ]+) ([^\\n: ]+) (:)([^\\n:]+)$"));
-	}
+    public MotdEndLex() {
+        super(Pattern.compile("(:)([^\\n: ]+) ([^\\n: ]+) ([^\\n: ]+) (:)End of message of the day"));
+    }
 
-	@Override
-	public void onDataReceive(String data, Matcher matcher, WolfIRC client) {
-		client.hasMotdEnd.set(true);
-		System.out.println("motd has ended");
-	}
+    @Override
+    public void onDataReceive(String data, Matcher matcher, WolfIRC client) {
+        client.hasMotdEnd.set(true);
+        client.onMotdEndEvent.fire();
+    }
 }
