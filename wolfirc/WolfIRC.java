@@ -6,14 +6,13 @@ import pisi.unitedmeows.yystal.networking.IPAddress;
 import pisi.unitedmeows.yystal.networking.client.YTcpClient;
 import pisi.unitedmeows.yystal.networking.client.extension.impl.CTcpLineRead;
 import pisi.unitedmeows.yystal.networking.events.CDataReceivedEvent;
+import pisi.unitedmeows.yystal.utils.kThread;
 import wolfirc.events.*;
 import wolfirc.lex.Lex;
 import wolfirc.lex.impl.*;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 
 public class WolfIRC {
@@ -24,7 +23,7 @@ public class WolfIRC {
 	protected String username;
 	protected String userInfo;
 	protected static List<Lex> lexes /* all my exes live in texas */ = new ArrayList<Lex>();
-
+	protected Queue<String> dataQueue;
 
 	public event<WOnPing> onPingEvent = new event<>();
 	public event<WOnMotdEnd> onMotdEndEvent = new event<>();
@@ -50,19 +49,31 @@ public class WolfIRC {
 		}
 	};
 
+	private boolean useSendQueue;
+	private Thread sendThread;
+
 	static {
 		lexes.add(new PingLex());
 		lexes.add(new MotdEndLex());
 		lexes.add(new RoomJoinLex());
 		lexes.add(new ChannelNamesLex());
 		lexes.add(new ChannelMessageLex());
+		lexes.add(new UserChannelJoinLex());
+		lexes.add(new UserNickChangeLex());
+		lexes.add(new UserQuitLex());
 	}
+
 
 	public WolfIRC(final String _username, final String _userInfo) {
 		client = new YTcpClient();
 		username = _username;
 		userInfo = _userInfo;
 		joinedRooms = new HashMap<>();
+		dataQueue = new ArrayDeque<>();
+	}
+
+	public WolfIRC(final String _username) {
+		this(_username, "WolfIRC Bot");
 	}
 
 	public void connect(String _host, int _port) {
@@ -93,15 +104,26 @@ public class WolfIRC {
 		/* sends user info */
 		sendRawLine("NICK " + username);
 		sendRawLine("USER " + username + " 8 * :" + userInfo);
-		onMotdEndEvent.bind(new WOnMotdEnd() {
-			@Override
-			public void onMotdEnd() {
-				joinRoom("freenode");
-			}
-		});
+
+		if (useSendQueue()) {
+			sendThread = new Thread(this::_writeQueue);
+			sendThread.start();
+		}
 	}
 
+	protected void _writeQueue() {
+		while (isConnected()) {
+			if (!dataQueue.isEmpty()) {
+				String writeData = dataQueue.poll();
+				sendDirectLine(writeData);
+			}
+			kThread.sleep(50);
+		}
+	}
 
+	public void close() {
+		client.close();
+	}
 
 	public boolean isConnected() {
 		return client.isConnected();
@@ -111,18 +133,91 @@ public class WolfIRC {
 		client.send(data.getBytes(StandardCharsets.UTF_8));
 	}
 
-	public void joinRoom(String room) {
-		if (room.startsWith("#"))
-			room = room.substring(1);
+	public void sendDirectLine(String data) {
+		client.send((data + "\n").getBytes(StandardCharsets.UTF_8));
+	}
 
-		sendRawLine("JOIN #" + room);
+	public void setMode(String mode) {
+		if (!mode.startsWith("+")) {
+			mode = "+" + mode;
+		}
+		sendRawLine("MODE " + mode);
+	}
+
+	public void leaveChannel(String channelName) {
+		if (!channelName.startsWith("#")) {
+			channelName = "#" + channelName;
+		}
+		sendRawLine("PART " + channelName);
+	}
+
+	public void sendPM(String user, String message) {
+		sendDirectLine(String.format("PRIVMSG %s :%s", user, message));
+	}
+
+	@Deprecated
+	public void register(String password) {
+		sendPM("NICKSERV", String.format("register %s", password));
+	}
+
+	public void register(String password, String email) {
+		sendPM("NICKSERV", String.format("register %s %s", password, email));
+	}
+
+	public void login(String password) {
+		sendPM("NICKSERV", String.format("identify %s", password));
+	}
+
+	public void leaveChannel(String channelName, String reason) {
+		if (!channelName.startsWith("#")) {
+			channelName = "#" + channelName;
+		}
+		sendRawLine("PART " + channelName + " " + reason);
+	}
+
+	public void sendMessage(String message, String channel) {
+		if (!channel.startsWith("#")) {
+			channel = "#" + channel;
+		}
+		sendRawLine("PRIVMSG " + channel + " :" + message);
+	}
+
+	public void joinChannel(String channel) {
+		if (channel.startsWith("#"))
+			channel = channel.substring(1);
+
+		if (hasMotdEnd.get()) {
+			sendRawLine("JOIN #" + channel);
+		} else {
+			final String channelName = channel;
+			prop<Integer> eventId = new prop<>();
+			eventId.set(onMotdEndEvent.bind(new WOnMotdEnd() {
+				@Override
+				public void onMotdEnd() {
+					sendRawLine("JOIN #" + channelName);
+					onMotdEndEvent.free(eventId.get());
+				}
+			}));
+		}
 	}
 
 	public void sendRawLine(String data) {
-		client.send((data + "\n").getBytes(StandardCharsets.UTF_8));
+		if (useSendQueue) {
+			dataQueue.add(data);
+		} else {
+			sendDirectLine(data);
+		}
 	}
 
 	protected WolfIRC instance() {
 		return this;
+	}
+
+	public void setUseSendQueue(boolean useSendQueue) {
+		this.useSendQueue = useSendQueue;
+	}
+
+	public boolean useSendQueue() {
+		return useSendQueue;
 	}
 }

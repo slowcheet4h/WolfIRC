@@ -21,10 +21,10 @@ public class ChannelNamesLex extends Lex {
 		final IRCChannel ircChannel = client.joinedRooms.computeIfAbsent(channel, f -> new IRCChannel(channel));
 		if (users.contains(" ")) {
 			for (String user : users.split(" ")) {
-				ircChannel.users().add(new IRCUser(user));
+				ircChannel.addUser(new IRCUser(user));
 			}
 		} else {
-			ircChannel.users().add(new IRCUser(users));
+			ircChannel.addUser(new IRCUser(users));
 		}
 	}
 }

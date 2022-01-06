@@ -10,7 +10,7 @@ public class MotdEndLex extends Lex {
 
 
     public MotdEndLex() {
-        super(Pattern.compile("(:)([^\\n: ]+) ([^\\n: ]+) ([^\\n: ]+) (:)End of message of the day"));
+        super(Pattern.compile("^:[^ ]+ 376 [^ ]+ .+$"));
     }
 
     @Override
