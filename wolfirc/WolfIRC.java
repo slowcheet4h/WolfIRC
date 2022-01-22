@@ -201,6 +201,21 @@ public class WolfIRC {
 		}
 	}
 
+	public void changeUsername(String _username) {
+		sendRawLine("NICK " + _username);
+
+		for (IRCChannel ircChannel : joinedRooms.values()) {
+			for (IRCUser user : ircChannel.users()) {
+				if (user.username().equalsIgnoreCase(username)) {
+					user.setUsername(_username);
+					break;
+				}
+			}
+		}
+
+		username = _username;
+	}
+
 	public void sendRawLine(String data) {
 		if (useSendQueue) {
 			dataQueue.add(data);

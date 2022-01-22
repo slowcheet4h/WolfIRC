@@ -11,9 +11,10 @@ import wolfirc.events.WOnRawData;
 public class TestWolf {
 
     public static void main(String[] args) {
+
         WolfIRC wolfIRC = new WolfIRC("WolfIRCBot", "WolfIRC Bot");
         wolfIRC.connect("irc.freenode.net", 6667);
-        wolfIRC.joinChannel("#kediler123");
+        wolfIRC.joinChannel("#wolfirc");
 
         wolfIRC.onChannelMessage.bind(new WOnChannelMessage() {
             @Override
@@ -21,6 +22,11 @@ public class TestWolf {
                 System.out.println("channel message received");
             }
         });
+
+        wolfIRC.useSendQueue();
+
+
+
 
         kThread.sleep(100000);
     }
