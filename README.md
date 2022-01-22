@@ -45,7 +45,7 @@ WolfIRC for java is a java irc client library for making bots and clients<br>thi
   client.sendPM(String user, String message) /* sends pm */
   client.register(String password, String email) /* tries to register the server (!! Deprecated use sendRaw instead) */
   client.close(); /* closes the client */
-  client.setUsername(String) /* change nick */
+  client.changeUsername(String) /* change nick */
   
   client.joinedRooms /* map of channels you have joined */
 ```
