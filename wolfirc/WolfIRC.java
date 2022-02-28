@@ -24,6 +24,7 @@ public class WolfIRC {
 	protected String userInfo;
 	protected static List<Lex> lexes /* all my exes live in texas */ = new ArrayList<Lex>();
 	protected Queue<String> dataQueue;
+	protected int queueDelay;
 
 	public event<WOnPing> onPingEvent = new event<>();
 	public event<WOnMotdEnd> onMotdEndEvent = new event<>();
@@ -105,7 +106,7 @@ public class WolfIRC {
 		sendRawLine("NICK " + username);
 		sendRawLine("USER " + username + " 8 * :" + userInfo);
 
-		if (useSendQueue()) {
+		if (isUsingSendQueue()) {
 			sendThread = new Thread(this::_writeQueue);
 			sendThread.start();
 		}
@@ -117,7 +118,7 @@ public class WolfIRC {
 				String writeData = dataQueue.poll();
 				sendDirectLine(writeData);
 			}
-			kThread.sleep(50);
+			kThread.sleep(queueDelay);
 		}
 	}
 
@@ -228,11 +229,18 @@ public class WolfIRC {
 		return this;
 	}
 
-	public void setUseSendQueue(boolean useSendQueue) {
-		this.useSendQueue = useSendQueue;
+
+	public WolfIRC useSendQueue() {
+		useSendQueue = true;
+		return this;
 	}
 
-	public boolean useSendQueue() {
+	public WolfIRC useSendQueue(int delay) {
+		queueDelay = delay;
+		return useSendQueue();
+	}
+
+	public boolean isUsingSendQueue() {
 		return useSendQueue;
 	}
 }
