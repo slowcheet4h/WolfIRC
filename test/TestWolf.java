@@ -12,9 +12,10 @@ public class TestWolf {
 
     public static void main(String[] args) {
 
-        WolfIRC wolfIRC = new WolfIRC("WolfIRCBot", "WolfIRC Bot");
+        WolfIRC wolfIRC = new WolfIRC("WolfIRCBot2", "WolfIRC").useSendQueue(500);
+
         wolfIRC.connect("irc.freenode.net", 6667);
-        wolfIRC.joinChannel("#wolfirc");
+        wolfIRC.joinChannel("#wolfirc998");
 
         wolfIRC.onChannelMessage.bind(new WOnChannelMessage() {
             @Override
@@ -22,8 +23,13 @@ public class TestWolf {
                 System.out.println("channel message received");
             }
         });
+        wolfIRC.onRawDataEvent.bind(new WOnRawData() {
+            @Override
+            public void onRawData(String data) {
+                System.out.println(data);
+            }
+        });
 
-        wolfIRC.useSendQueue();
 
 
 
