@@ -56,14 +56,13 @@ public class WolfIRC {
 	static {
 		lexes.add(new PingLex());
 		lexes.add(new MotdEndLex());
-		lexes.add(new RoomJoinLex());
+		//lexes.add(new RoomJoinLex());
 		lexes.add(new ChannelNamesLex());
 		lexes.add(new ChannelMessageLex());
 		lexes.add(new UserChannelJoinLex());
 		lexes.add(new UserNickChangeLex());
 		lexes.add(new UserQuitLex());
 	}
-
 
 	public WolfIRC(final String _username, final String _userInfo) {
 		client = new YTcpClient();
@@ -75,6 +74,10 @@ public class WolfIRC {
 
 	public WolfIRC(final String _username) {
 		this(_username, "WolfIRC Bot");
+	}
+
+	public void connect(String _host) {
+		connect(_host, 6667);
 	}
 
 	public void connect(String _host, int _port) {
@@ -103,7 +106,6 @@ public class WolfIRC {
 				onRawDataEvent.fire(received);
 			}
 		});
-
 
 
 		if (isUsingSendQueue()) {
@@ -202,6 +204,8 @@ public class WolfIRC {
 		}
 	}
 
+
+
 	public void changeUsername(String _username) {
 		sendRawLine("NICK " + _username);
 
@@ -229,7 +233,6 @@ public class WolfIRC {
 		return this;
 	}
 
-
 	public WolfIRC useSendQueue() {
 		useSendQueue = true;
 		return this;
@@ -239,6 +242,14 @@ public class WolfIRC {
 		queueDelay = delay;
 		useSendQueue = true;
 		return this;
+	}
+
+	public String username() {
+		return username;
+	}
+
+	public String userInfo() {
+		return userInfo;
 	}
 
 	public boolean isUsingSendQueue() {

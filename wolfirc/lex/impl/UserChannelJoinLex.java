@@ -21,8 +21,12 @@ public class UserChannelJoinLex extends Lex {
 		final IRCChannel ircChannel = client.joinedRooms.computeIfAbsent(channelName, f -> new IRCChannel(channelName));
 
 		final IRCUser user = new IRCUser(username);
-		ircChannel.users().add(user);
-
-		client.onUserJoinChannelEvent.fire(ircChannel, user);
+		if (user.username().equalsIgnoreCase(client.username())) {
+			ircChannel.users().add(user);
+			client.onChannelJoinEvent.fire(channelName);
+		} else {
+			ircChannel.users().add(user);
+			client.onUserJoinChannelEvent.fire(ircChannel, user);
+		}
 	}
 }
